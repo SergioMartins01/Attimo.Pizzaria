@@ -112,3 +112,93 @@ export const depoimentos = [
 ];
 
 export const favoritosDaCasa = cardapio.filter((item) => item.nome !== 'Coca-Cola 2L');
+
+export const cardapioOficialSalgadas: Produto[] = [
+  {
+    id: 101,
+    nome: 'Pizza Calabresa',
+    descricao: 'Passata de tomate, muçarela, calabresa e orégano.',
+    ingredientes: ['passata de tomate', 'muçarela', 'calabresa', 'orégano'],
+    imagem: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Coca-Cola 2L', 'Batata frita', 'Pão de alho', 'Molho extra'],
+  },
+  {
+    id: 102,
+    nome: 'Pizza Pepperoni',
+    descricao: 'Passata de tomate, muçarela, pepperoni.',
+    ingredientes: ['passata de tomate', 'muçarela', 'pepperoni'],
+    imagem: 'https://images.unsplash.com/photo-1548365328-9f547fb9587c?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Coca-Cola 2L', 'Batata', 'Pão de alho'],
+  },
+  {
+    id: 103,
+    nome: 'Pizza Margherita',
+    descricao: 'Passata de tomate, muçarela e manjericão.',
+    ingredientes: ['passata de tomate', 'muçarela', 'manjericão'],
+    imagem: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Água com gás', 'Bruschetta', 'Suco natural', 'Salada'],
+  },
+  {
+    id: 104,
+    nome: 'Pizza Quatro Queijos',
+    descricao: 'Base bianca, muçarela, parmesão, provolone e gorgonzola.',
+    ingredientes: ['base bianca', 'muçarela', 'parmesão', 'provolone', 'gorgonzola'],
+    imagem: 'https://images.unsplash.com/photo-1552539618-7eec9b4d8f95?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Suco natural', 'Bruschetta', 'Molho extra'],
+  },
+];
+
+export const cardapioOficialDoces: Produto[] = [
+  {
+    id: 105,
+    nome: 'Pizza Bianco & Fragola',
+    descricao: 'Ganache de chocolate branco e compota artesanal de morangos.',
+    ingredientes: ['ganache de chocolate branco', 'compota artesanal de morangos'],
+    imagem: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Coca-Cola 2L', 'Sorvete de creme'],
+  },
+  {
+    id: 106,
+    nome: 'Pizza Caramelada',
+    descricao: 'Ganache de banana caramelizada e doce de leite.',
+    ingredientes: ['ganache de banana caramelizada', 'doce de leite'],
+    imagem: 'https://images.unsplash.com/photo-1506354666786-959d6d497f1a?auto=format&fit=crop&w=900&q=80',
+    tamanhos: [
+      { nome: 'Pequena', preco: 34.9 },
+      { nome: 'Média', preco: 34.9 },
+      { nome: 'Grande', preco: 44.9 },
+      { nome: 'Extra Grande', preco: 54.9 },
+    ],
+    acompanhamentos: ['Coca-Cola 2L', 'Doce de leite extra'],
+  },
+];
