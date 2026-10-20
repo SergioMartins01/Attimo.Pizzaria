@@ -349,15 +349,10 @@ function App() {
   useEffect(() => {
     if (!pendingReview) return;
 
-    const elapsed = Date.now() - pendingReview.createdAt;
-    if (elapsed >= TEMPO_AVALIACAO_MS) {
-      setReviewModalOpen(true);
-      return;
-    }
-
+    const remainingMs = Math.max(TEMPO_AVALIACAO_MS - (Date.now() - pendingReview.createdAt), 0);
     const timer = window.setTimeout(() => {
       setReviewModalOpen(true);
-    }, TEMPO_AVALIACAO_MS - elapsed);
+    }, remainingMs);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
