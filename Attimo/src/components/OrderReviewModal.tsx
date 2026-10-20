@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { CheckCircle, Star, X } from '@phosphor-icons/react';
-import type { PendingReview } from '../types';
+import type { PendingReview, ReviewDraft } from '../types';
+import { readStoredValue, STORAGE_KEYS } from '../utils';
 
 type OrderReviewModalProps = {
   review: PendingReview;
@@ -31,10 +32,25 @@ export function OrderReviewModal({
   onPostpone,
   onDismiss,
 }: OrderReviewModalProps) {
-  const [rating, setRating] = useState(5);
-  const [selectedTags, setSelectedTags] = useState<string[]>(['Sabor incrível']);
-  const [comment, setComment] = useState('');
+  const initialDraft = readStoredValue<ReviewDraft | null>(STORAGE_KEYS.REVIEW_DRAFT, null);
+  const matchingDraft = initialDraft?.orderId === review.orderId ? initialDraft : null;
+
+  const [rating, setRating] = useState<number>(matchingDraft?.rating ?? 5);
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    matchingDraft?.selectedTags ?? ['Sabor incrível'],
+  );
+  const [comment, setComment] = useState<string>(matchingDraft?.comment ?? '');
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const draftToSave: ReviewDraft = {
+      orderId: review.orderId,
+      rating,
+      selectedTags,
+      comment,
+    };
+    window.localStorage.setItem(STORAGE_KEYS.REVIEW_DRAFT, JSON.stringify(draftToSave));
+  }, [review.orderId, rating, selectedTags, comment]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((current) =>
@@ -45,9 +61,15 @@ export function OrderReviewModal({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
+    window.localStorage.removeItem(STORAGE_KEYS.REVIEW_DRAFT);
     window.setTimeout(() => {
       onSubmit();
     }, 1200);
+  };
+
+  const handleDismiss = () => {
+    window.localStorage.removeItem(STORAGE_KEYS.REVIEW_DRAFT);
+    onDismiss();
   };
 
   return (
@@ -139,7 +161,7 @@ export function OrderReviewModal({
               </label>
 
               <div className="review-actions">
-                <button type="button" className="continue-shopping" onClick={onDismiss}>
+                <button type="button" className="continue-shopping" onClick={handleDismiss}>
                   Não avaliar
                 </button>
                 <div className="review-actions-right">

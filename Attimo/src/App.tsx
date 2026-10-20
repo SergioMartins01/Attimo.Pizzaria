@@ -27,17 +27,27 @@ import { OrderReviewModal } from './components/OrderReviewModal';
 import { ProductModal } from './components/ProductModal';
 import brandLogo from './img/Captura de tela 2026-09-01 210620.png';
 import './checkout.css';
-import type { ActiveOrder, CartItem, CheckoutDraft, PendingReview, Produto, Tamanho } from './types';
+import type {
+  ActiveOrder,
+  CartItem,
+  Category,
+  CheckoutDraft,
+  PendingReview,
+  Produto,
+  Tamanho,
+  UiSessionState,
+} from './types';
 import {
   calculateOrderTotal,
+  DEFAULT_CHECKOUT_DRAFT,
+  findProductById,
   formatCurrency,
+  normalizeCheckoutDraft,
   PRECO_ACOMPANHAMENTO,
   readStoredValue,
   STORAGE_KEYS,
   TEMPO_AVALIACAO_MS,
 } from './utils';
-
-type Category = 'Todos' | 'Pizzas' | 'Bebidas' | 'Acompanhamentos';
 
 const CATEGORIES: { label: Category; icon: ReactNode }[] = [
   { label: 'Todos', icon: <SquaresFour size={16} weight="duotone" /> },
@@ -46,21 +56,17 @@ const CATEGORIES: { label: Category; icon: ReactNode }[] = [
   { label: 'Acompanhamentos', icon: <ForkKnife size={16} weight="duotone" /> },
 ];
 
-const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
-  currentStep: 1,
-  fulfillment: 'delivery',
-  paymentMethod: 'pix',
-  installments: '1',
-  address: {
-    zipCode: '',
-    state: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    reference: '',
-  },
+const DEFAULT_UI_SESSION: UiSessionState = {
+  activeCategory: 'Todos',
+  search: '',
+  activeProductId: null,
+  selectedSize: 'Média',
+  selectedExtras: [],
+  cardapioOpen: false,
+  cartOpen: false,
+  checkoutOpen: false,
+  newsletterSent: false,
+  newsletterEmail: '',
 };
 
 function getProductCategory(product: Produto): Exclude<Category, 'Todos'> {
@@ -274,19 +280,29 @@ function BottomNavigation({ onOpenCardapio }: { onOpenCardapio: () => void }) {
 }
 
 function App() {
+  const storedSession = useMemo(
+    () => ({
+      ...DEFAULT_UI_SESSION,
+      ...readStoredValue<Partial<UiSessionState>>(STORAGE_KEYS.UI_SESSION, DEFAULT_UI_SESSION),
+    }),
+    [],
+  );
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     readStoredValue(STORAGE_KEYS.THEME, 'light'),
   );
-  const [activeCategory, setActiveCategory] = useState<Category>('Todos');
-  const [search, setSearch] = useState('');
-  const [activeProduct, setActiveProduct] = useState<Produto | null>(null);
-  const [selectedSize, setSelectedSize] = useState<Tamanho>('Média');
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState<Category>(storedSession.activeCategory);
+  const [search, setSearch] = useState<string>(storedSession.search);
+  const [activeProduct, setActiveProduct] = useState<Produto | null>(() =>
+    findProductById(storedSession.activeProductId),
+  );
+  const [selectedSize, setSelectedSize] = useState<Tamanho>(storedSession.selectedSize);
+  const [selectedExtras, setSelectedExtras] = useState<string[]>(storedSession.selectedExtras);
   const [cartItems, setCartItems] = useState<CartItem[]>(() =>
     readStoredValue(STORAGE_KEYS.CART, []),
   );
   const [checkoutDraft, setCheckoutDraft] = useState<CheckoutDraft>(() =>
-    readStoredValue(STORAGE_KEYS.CHECKOUT, DEFAULT_CHECKOUT_DRAFT),
+    normalizeCheckoutDraft(readStoredValue<Partial<CheckoutDraft> | null>(STORAGE_KEYS.CHECKOUT, null)),
   );
   const [activeOrder, setActiveOrder] = useState<ActiveOrder | null>(() =>
     readStoredValue(STORAGE_KEYS.ACTIVE_ORDER, null),
@@ -294,13 +310,18 @@ function App() {
   const [pendingReview, setPendingReview] = useState<PendingReview | null>(() =>
     readStoredValue(STORAGE_KEYS.PENDING_REVIEW, null),
   );
-  const [reviewModalOpen, setReviewModalOpen] = useState<boolean>(() =>
-    Boolean(readStoredValue(STORAGE_KEYS.PENDING_REVIEW, null)),
-  );
-  const [cardapioOpen, setCardapioOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [newsletterSent, setNewsletterSent] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState<boolean>(() => {
+    const hasPending = Boolean(readStoredValue(STORAGE_KEYS.PENDING_REVIEW, null));
+    const isTrackingActiveOrder =
+      storedSession.checkoutOpen &&
+      Boolean(readStoredValue(STORAGE_KEYS.ACTIVE_ORDER, null));
+    return hasPending && !isTrackingActiveOrder;
+  });
+  const [cardapioOpen, setCardapioOpen] = useState<boolean>(storedSession.cardapioOpen);
+  const [cartOpen, setCartOpen] = useState<boolean>(storedSession.cartOpen);
+  const [checkoutOpen, setCheckoutOpen] = useState<boolean>(storedSession.checkoutOpen);
+  const [newsletterSent, setNewsletterSent] = useState<boolean>(storedSession.newsletterSent);
+  const [newsletterEmail, setNewsletterEmail] = useState<string>(storedSession.newsletterEmail);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEYS.THEME, JSON.stringify(theme));
@@ -310,6 +331,33 @@ function App() {
       document.documentElement.removeAttribute('data-theme');
     }
   }, [theme]);
+
+  useEffect(() => {
+    const sessionToSave: UiSessionState = {
+      activeCategory,
+      search,
+      activeProductId: activeProduct?.id ?? null,
+      selectedSize,
+      selectedExtras,
+      cardapioOpen,
+      cartOpen,
+      checkoutOpen,
+      newsletterSent,
+      newsletterEmail,
+    };
+    window.localStorage.setItem(STORAGE_KEYS.UI_SESSION, JSON.stringify(sessionToSave));
+  }, [
+    activeCategory,
+    search,
+    activeProduct,
+    selectedSize,
+    selectedExtras,
+    cardapioOpen,
+    cartOpen,
+    checkoutOpen,
+    newsletterSent,
+    newsletterEmail,
+  ]);
 
   useEffect(() => {
     if (activeProduct || cardapioOpen || reviewModalOpen) {
@@ -445,13 +493,16 @@ function App() {
     setCartOpen(false);
     setCardapioOpen(false);
     setCheckoutOpen(true);
-    setCheckoutDraft((draft) => ({ ...draft, currentStep: 1 }));
+    setCheckoutDraft((draft) => ({
+      ...draft,
+      currentStep: draft.currentStep === 4 ? 1 : draft.currentStep,
+    }));
   };
 
   const trackOrder = () => {
     if (!activeOrder) return;
     setCardapioOpen(false);
-    setCheckoutDraft(activeOrder.draft);
+    setCheckoutDraft(normalizeCheckoutDraft(activeOrder.draft));
     setCheckoutOpen(true);
   };
 
@@ -481,7 +532,9 @@ function App() {
   };
 
   const startNewOrder = () => {
-    setCheckoutDraft(DEFAULT_CHECKOUT_DRAFT);
+    setCheckoutDraft((current) =>
+      current.currentStep === 4 ? DEFAULT_CHECKOUT_DRAFT : current,
+    );
     setCheckoutOpen(false);
     setCartOpen(false);
   };
@@ -642,7 +695,14 @@ function App() {
           <form className="newsletter-form" onSubmit={submitNewsletter}>
             <label htmlFor="email">Seu melhor e-mail</label>
             <div>
-              <input id="email" type="email" required placeholder="voce@email.com" />
+              <input
+                id="email"
+                type="email"
+                required
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
+                placeholder="voce@email.com"
+              />
               <button className="primary-button" type="submit">
                 {newsletterSent ? (
                   <>
@@ -709,6 +769,10 @@ function App() {
       {cartOpen && (
         <CartDrawer
           items={cartItems}
+          couponCode={checkoutDraft.couponCode}
+          onCouponChange={(couponCode) =>
+            setCheckoutDraft((current) => ({ ...current, couponCode }))
+          }
           onClose={() => setCartOpen(false)}
           onChangeQuantity={changeQuantity}
           onRemove={removeItem}

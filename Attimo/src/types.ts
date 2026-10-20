@@ -1,5 +1,7 @@
 export type Tamanho = 'Pequena' | 'Média' | 'Grande' | 'Extra Grande';
 
+export type Category = 'Todos' | 'Pizzas' | 'Bebidas' | 'Acompanhamentos';
+
 export type Produto = {
   id: number;
   nome: string;
@@ -45,12 +47,20 @@ export type DeliveryAddress = {
   reference: string;
 };
 
+export type CardDetails = {
+  number: string;
+  expiry: string;
+  cvv: string;
+};
+
 export type CheckoutDraft = {
   currentStep: number;
   fulfillment: Fulfillment;
   paymentMethod: PaymentMethod;
   installments: string;
+  couponCode: string;
   address: DeliveryAddress;
+  cardDetails: CardDetails;
 };
 
 export type ActiveOrder = {
@@ -65,4 +75,24 @@ export type PendingReview = {
   createdAt: number;
   items: CartItem[];
   fulfillment: Fulfillment;
+};
+
+export type ReviewDraft = {
+  orderId: string;
+  rating: number;
+  selectedTags: string[];
+  comment: string;
+};
+
+export type UiSessionState = {
+  activeCategory: Category;
+  search: string;
+  activeProductId: number | null;
+  selectedSize: Tamanho;
+  selectedExtras: string[];
+  cardapioOpen: boolean;
+  cartOpen: boolean;
+  checkoutOpen: boolean;
+  newsletterSent: boolean;
+  newsletterEmail: string;
 };

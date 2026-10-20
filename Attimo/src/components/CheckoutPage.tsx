@@ -14,7 +14,14 @@ import {
   ShoppingBagOpen,
   Storefront,
 } from '@phosphor-icons/react';
-import type { CartItem, CheckoutDraft, DeliveryAddress, Fulfillment, PaymentMethod } from '../types';
+import type {
+  CardDetails,
+  CartItem,
+  CheckoutDraft,
+  DeliveryAddress,
+  Fulfillment,
+  PaymentMethod,
+} from '../types';
 import { formatCurrency, TAXA_ENTREGA } from '../utils';
 
 type CheckoutPageProps = {
@@ -253,14 +260,22 @@ function AddressForm({
 function PaymentOptions({
   method,
   installments,
+  cardDetails,
   onChange,
   onInstallmentsChange,
+  onCardDetailsChange,
 }: {
   method: PaymentMethod;
   installments: string;
+  cardDetails: CardDetails;
   onChange: (method: PaymentMethod) => void;
   onInstallmentsChange: (value: string) => void;
+  onCardDetailsChange: (cardDetails: CardDetails) => void;
 }) {
+  const updateCard =
+    (field: keyof CardDetails) => (event: ChangeEvent<HTMLInputElement>) =>
+      onCardDetailsChange({ ...cardDetails, [field]: event.target.value });
+
   return (
     <div className="payment-form">
       <div className="checkout-form-heading">
@@ -322,16 +337,33 @@ function PaymentOptions({
         <div className="card-fields">
           <label>
             Número do cartão
-            <input required inputMode="numeric" placeholder="0000 0000 0000 0000" />
+            <input
+              required
+              inputMode="numeric"
+              value={cardDetails.number}
+              onChange={updateCard('number')}
+              placeholder="0000 0000 0000 0000"
+            />
           </label>
           <div>
             <label>
               Validade
-              <input required placeholder="MM/AA" />
+              <input
+                required
+                value={cardDetails.expiry}
+                onChange={updateCard('expiry')}
+                placeholder="MM/AA"
+              />
             </label>
             <label>
               CVV
-              <input required inputMode="numeric" placeholder="000" />
+              <input
+                required
+                inputMode="numeric"
+                value={cardDetails.cvv}
+                onChange={updateCard('cvv')}
+                placeholder="000"
+              />
             </label>
           </div>
           <label>
@@ -585,8 +617,10 @@ export function CheckoutPage({
               <PaymentOptions
                 method={draft.paymentMethod}
                 installments={draft.installments}
+                cardDetails={draft.cardDetails}
                 onChange={(paymentMethod) => updateDraft({ paymentMethod })}
                 onInstallmentsChange={(installments) => updateDraft({ installments })}
+                onCardDetailsChange={(cardDetails) => updateDraft({ cardDetails })}
               />
             )}
 
