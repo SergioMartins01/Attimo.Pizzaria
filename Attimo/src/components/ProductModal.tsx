@@ -1,4 +1,5 @@
 import { useEffect, type Dispatch, type SetStateAction } from 'react';
+import { ShoppingBagOpen, Star, X } from '@phosphor-icons/react';
 import type { Produto, Tamanho } from '../types';
 import { formatCurrency } from '../utils';
 
@@ -38,13 +39,15 @@ export function ProductModal({
       <section className="product-modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" onClick={(event) => event.stopPropagation()}>
         <div className="modal-image-wrap">
           <img src={produto.imagem} alt={produto.nome} referrerPolicy="no-referrer" />
-          <button className="modal-close" type="button" onClick={onClose} aria-label="Fechar detalhes">×</button>
+          <button className="modal-close" type="button" onClick={onClose} aria-label="Fechar detalhes">
+            <X size={18} weight="bold" />
+          </button>
         </div>
         <div className="modal-content">
           <span className="eyebrow">Escolha do dia</span>
           <div className="modal-title-row">
             <h2 id="product-modal-title">{produto.nome}</h2>
-            <span className="modal-rating">★ 4,9</span>
+            <span className="modal-rating"><Star size={14} weight="fill" /> 4,9</span>
           </div>
           <p className="modal-description">{produto.descricao}</p>
           <p className="ingredients"><strong>Ingredientes:</strong> {produto.ingredientes.join(', ')}</p>
@@ -83,7 +86,10 @@ export function ProductModal({
 
           <div className="modal-footer">
             <div><small>Total do pedido</small><strong>{formatCurrency(valorTotal)}</strong>{valorAcompanhamentos > 0 && <span>+ {formatCurrency(valorAcompanhamentos)} em adicionais</span>}</div>
-            <button className="primary-button" type="button" onClick={onAddToCart}>Adicionar ao pedido</button>
+            <button className="primary-button" type="button" onClick={onAddToCart}>
+              <ShoppingBagOpen size={17} weight="bold" />
+              Adicionar ao pedido
+            </button>
           </div>
         </div>
       </section>
